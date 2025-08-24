@@ -116,15 +116,25 @@ function App() {
         : Object.values(rawSubs || {});
 
       // Invoices may come as an object keyed by id or as an array
-const rawInv =
-  data?.['node.invoice'] ??
-  data?.invoices ??
-  data?.invoice ??
-  [];
+// Invoices may come as an object keyed by id or as an array
+const rawInv = (() => {
+  // try the common shapes first
+  const direct =
+    data?.['node.invoice'] ??
+    data?.node?.invoice ??
+    data?.['node.invoices'] ??
+    data?.node?.invoices ??
+    data?.invoices ??
+    data?.invoice;
 
-const invoicesArray = Array.isArray(rawInv)
-  ? rawInv
-  : Object.values(rawInv || {});
+  if (direct) return direct;
+
+  // last-resort: find any key that contains "invoice"
+  const key = Object.keys(data || {}).find(k => /invoice/i.test(k));
+  return key ? data[key] : [];
+})();
+
+const invoicesArray = Array.isArray(rawInv) ? rawInv : Object.values(rawInv || {});
 
 const normalizedInvoices = invoicesArray
   .map((inv) => ({
