@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 // --- API Constants ---
@@ -198,6 +198,9 @@ const renderDate = (value) => {
   }
 };
 
+const money = (n) =>
+  (n === null || n === undefined || n === '') ? 'N/A' : Number(n).toLocaleString('en-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 
   return (
     <div className="App">
@@ -244,8 +247,8 @@ const renderDate = (value) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {shops.map((shop) => (
-                    <tr key={shop.id ?? Math.random()}>
+                  {shops.map((shop, idx) => (
+                    <tr key={shop.id ?? `shop-${idx}`}>
                       <td>{shop.id ?? 'N/A'}</td>
                       <td>{shop.title || 'N/A'}</td>
                       <td>{shop.businessName || 'N/A'}</td>
@@ -330,8 +333,8 @@ const renderDate = (value) => {
           <td>{inv.type || 'N/A'}</td>
           <td>{inv.account || 'N/A'}</td>
           <td>{inv.status || 'N/A'}</td>
-          <td>{inv.totalAmount ?? 'N/A'}</td>
-          <td>{inv.vatAmount ?? 'N/A'}</td>
+          <td>{money(inv.totalAmount)}</td>
+          <td>{money(inv.vatAmount)}</td>
           <td>{renderDate(inv.dueDate)}</td>
           <td>{renderDate(inv.created)}</td>
           <td>{renderDate(inv.updated)}</td>
