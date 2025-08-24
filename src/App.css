@@ -1,0 +1,160 @@
+/* ---------- Base layout ---------- */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch !important;  /* was center */
+  width: 100% !important;
+  min-height: 100vh;
+}
+
+/* Header stays at the top */
+.App-header {
+  background-color: #282c34;
+  color: white;
+  padding: 24px 20px;
+  text-align: center;
+  width: 100%;
+}
+
+/* ---------- Centered, vertical stacking ---------- */
+.main-content {
+  max-width: none !important;       /* remove 1200px cap */
+  width: 100% !important;
+  padding: 0 40px 40px;              /* keep some side padding */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;              /* children fill width */
+  gap: 20px;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+/* Each section fills full width */
+.input-section,
+.results-section,
+.detailed-data-section {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 24px;
+}
+
+/* ---------- Forms & buttons ---------- */
+.input-section h2,
+.results-section h2,
+.detailed-data-section h2 {
+  margin: 0 0 16px 0;
+  color: #1b4d8a;
+}
+
+form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+input[type="text"] {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 220px;
+}
+
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Tables ---------- */
+.shop-table {
+  width: 100% !important;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.shop-table th,
+.shop-table td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.shop-table th {
+  color: #444;
+  font-weight: 700;
+}
+
+/* ---------- Utility states ---------- */
+.loading,
+.error {
+  width: 100%;
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.loading {
+  background: #fff6d6;
+}
+
+.error {
+  background: #ffe7e7;
+  color: #9c1c1c;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .App-header {
+    padding: 18px 14px;
+  }
+
+  .main-content {
+    padding: 0 16px 24px;
+    gap: 16px;
+  }
+
+  .input-section,
+  .results-section,
+  .detailed-data-section {
+    padding: 18px;
+    border-radius: 8px;
+  }
+
+  form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  button {
+    width: 100%;
+  }
+}
