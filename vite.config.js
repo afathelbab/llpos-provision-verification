@@ -4,5 +4,6 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/llpos-provision-verification/', // must match the repo name exactly
+  base: '/llpos-provision-verification/',
+  build: { outDir: 'docs' }  
 })
