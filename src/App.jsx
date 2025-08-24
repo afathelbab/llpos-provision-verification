@@ -115,10 +115,8 @@ function App() {
         ? rawSubs
         : Object.values(rawSubs || {});
 
-      // Invoices may come as an object keyed by id or as an array
-// Invoices may come as an object keyed by id or as an array
+// ---- Invoices (array or keyed object, possibly under node) ----
 const rawInv = (() => {
-  // try the common shapes first
   const direct =
     data?.['node.invoice'] ??
     data?.node?.invoice ??
@@ -126,12 +124,11 @@ const rawInv = (() => {
     data?.node?.invoices ??
     data?.invoices ??
     data?.invoice;
-
   if (direct) return direct;
 
-  // last-resort: find any key that contains "invoice"
-  const key = Object.keys(data || {}).find(k => /invoice/i.test(k));
-  return key ? data[key] : [];
+  // last resort: any key containing "invoice"
+  const k = Object.keys(data || {}).find((x) => /invoice/i.test(x));
+  return k ? data[k] : [];
 })();
 
 const invoicesArray = Array.isArray(rawInv) ? rawInv : Object.values(rawInv || {});
@@ -146,7 +143,7 @@ const normalizedInvoices = invoicesArray
     type: inv.type ?? 'N/A',
     account: inv.account ?? 'N/A',
   }))
-  .sort((a, b) => (Number(b.created ?? 0) - Number(a.created ?? 0)));
+  .sort((a, b) => Number(b.created ?? 0) - Number(a.created ?? 0));
 
 setDetailedData({
   ...data,
@@ -157,6 +154,7 @@ setDetailedData({
   })),
   invoices: normalizedInvoices,
 });
+
     } catch (err) {
       setError(err.message || 'Failed to fetch detailed data.');
     } finally {
@@ -343,8 +341,8 @@ const money = (n) =>
           <td>{inv.type || 'N/A'}</td>
           <td>{inv.account || 'N/A'}</td>
           <td>{inv.status || 'N/A'}</td>
-          <td>{money(inv.totalAmount)}</td>
-          <td>{money(inv.vatAmount)}</td>
+          <td>{inv.totalAmount ?? 'N/A'}</td>
+          <td>{inv.vatAmount ?? 'N/A'}</td>
           <td>{renderDate(inv.dueDate)}</td>
           <td>{renderDate(inv.created)}</td>
           <td>{renderDate(inv.updated)}</td>
@@ -355,6 +353,7 @@ const money = (n) =>
 ) : (
   <p>No invoices found.</p>
 )}
+
 
 
             <div style={{ marginTop: '1rem' }}>
