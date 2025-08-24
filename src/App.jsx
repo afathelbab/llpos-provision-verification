@@ -115,14 +115,38 @@ function App() {
         ? rawSubs
         : Object.values(rawSubs || {});
 
-      setDetailedData({
-        ...data,
-        subscriptions: subscriptionsArray.map((x) => ({
-          ...x,
-          title: x.title ?? x.name ?? x.displayName,
-          amount: x.amount ?? x.value ?? x.price,
-        })),
-      });
+      // Invoices may come as an object keyed by id or as an array
+const rawInv =
+  data?.['node.invoice'] ??
+  data?.invoices ??
+  data?.invoice ??
+  [];
+
+const invoicesArray = Array.isArray(rawInv)
+  ? rawInv
+  : Object.values(rawInv || {});
+
+const normalizedInvoices = invoicesArray
+  .map((inv) => ({
+    ...inv,
+    totalAmount: inv.totalAmount ?? inv.total_amount,
+    vatAmount: inv.vatAmount ?? inv.vat_amount,
+    dueDate: inv.dueDate ?? inv.due_date,
+    status: inv.status ?? 'N/A',
+    type: inv.type ?? 'N/A',
+    account: inv.account ?? 'N/A',
+  }))
+  .sort((a, b) => (Number(b.created ?? 0) - Number(a.created ?? 0)));
+
+setDetailedData({
+  ...data,
+  subscriptions: subscriptionsArray.map((x) => ({
+    ...x,
+    title: x.title ?? x.name ?? x.displayName,
+    amount: x.amount ?? x.value ?? x.price,
+  })),
+  invoices: normalizedInvoices,
+});
     } catch (err) {
       setError(err.message || 'Failed to fetch detailed data.');
     } finally {
@@ -151,17 +175,29 @@ function App() {
   };
 
   // Pretty date rendering with safety
-  const renderDate = (value) => {
-    if (!value) return 'N/A';
-    try {
-      // If epoch (number), handle it; else let Date parse ISO strings
-      const dt = typeof value === 'number' ? new Date(value) : new Date(String(value));
-      const valid = !Number.isNaN(dt.getTime());
-      return valid ? dt.toLocaleDateString() : String(value);
-    } catch {
+  // Pretty date rendering with safety (supports ISO and Unix seconds/millis)
+const renderDate = (value) => {
+  if (value === null || value === undefined || value === '') return 'N/A';
+  try {
+    let ms;
+    if (typeof value === 'number') {
+      ms = value < 1e12 ? value * 1000 : value; // seconds vs millis
+    } else if (/^\d+$/.test(String(value))) {
+      const n = Number(value);
+      ms = n < 1e12 ? n * 1000 : n;
+    } else {
+      // ISO or other string
+      const d = new Date(String(value));
+      if (!isNaN(d)) return d.toLocaleDateString();
       return String(value);
     }
-  };
+    const d = new Date(ms);
+    return isNaN(d) ? String(value) : d.toLocaleDateString();
+  } catch {
+    return String(value);
+  }
+};
+
 
   return (
     <div className="App">
@@ -271,6 +307,42 @@ function App() {
             ) : (
               <p>No subscriptions found.</p>
             )}
+            <h3 style={{ marginTop: '1rem' }}>Invoices</h3>
+{(detailedData?.invoices?.length ?? 0) > 0 ? (
+  <table className="shop-table">
+    <thead>
+      <tr>
+        <th>Invoice ID</th>
+        <th>Type</th>
+        <th>Account</th>
+        <th>Status</th>
+        <th>Total (DKK)</th>
+        <th>VAT</th>
+        <th>Due Date</th>
+        <th>Created</th>
+        <th>Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      {detailedData.invoices.map((inv) => (
+        <tr key={inv.id}>
+          <td>{inv.id}</td>
+          <td>{inv.type || 'N/A'}</td>
+          <td>{inv.account || 'N/A'}</td>
+          <td>{inv.status || 'N/A'}</td>
+          <td>{inv.totalAmount ?? 'N/A'}</td>
+          <td>{inv.vatAmount ?? 'N/A'}</td>
+          <td>{renderDate(inv.dueDate)}</td>
+          <td>{renderDate(inv.created)}</td>
+          <td>{renderDate(inv.updated)}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+) : (
+  <p>No invoices found.</p>
+)}
+
 
             <div style={{ marginTop: '1rem' }}>
               <button type="button" onClick={() => {
